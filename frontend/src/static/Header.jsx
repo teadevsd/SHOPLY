@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import shoplylogo from "../../public/shoply.png";
+import shoplylogo from "/shoply.png";
 import { MdFavorite } from "react-icons/md";
 import { FiSearch } from "react-icons/fi";
 import { Link } from "react-router-dom";
@@ -60,7 +60,11 @@ const Wrapper = styled.div`
   align-items: center;
   justify-content: flex-start;
   background-color: white;
-  position: relative; 
+  position: fixed; 
+  top: 0; 
+  width: 100%; 
+  z-index: 1000; 
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
 `;
 
 const Headerwrap = styled.div`
@@ -70,8 +74,6 @@ const Headerwrap = styled.div`
   width: 85%;
   max-width: 1200px;
   padding: 0 20px;
-  position: relative; 
-  z-index: 2; 
   height: 70px;
 `;
 
@@ -163,11 +165,8 @@ const Navbar = styled.div`
   height: 41px;
   width: 100%;
   background-color: #333333;
-  position: absolute;
-  top: 70px; 
-  z-index: 1; 
   display: flex; 
-  justify-content: center; 
+  justify-content: center;
 `;
 
 const InnerNav = styled.div`

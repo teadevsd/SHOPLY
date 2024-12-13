@@ -32,13 +32,17 @@ const HeroTwo = () => {
 export default HeroTwo
 
 const Wrapper = styled.div`
-    width: 100%;
-  height: calc(100vh - 140px); 
+  width: 100%;
+  height: calc(100vh - 140px); /* Adjust based on your header height */
+  max-height: 1000px; /* Max height for larger screens */
+  min-height: 600px; /* Minimum height for smaller screens */
+  
   background-size: cover;
   background-position: center;
   display: flex;
   align-items: center;
-`
+`;
+
 const InnerWrap = styled.div`
       display: flex;
     align-items: center;

@@ -6,10 +6,9 @@ import "react-phone-input-2/lib/style.css";
 // import signupimage from "../../assets/images/png/signupimage.png";
 import { Link } from "react-router-dom";
 
-const Login = () => {
+const SetNewPassword = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-  const [role, setRole] = useState("");
+
 
   return (
     <Wrapper>
@@ -17,11 +16,9 @@ const Login = () => {
 
           <FormCont>
             <form>
-            <p>Login to Shoply account</p>
+            <p>Set new password for your Shoply account</p>
               
-              <StyledInput type="email" placeholder="Email" name="email" />
-             
-              <PasswordWrapper>
+            <PasswordWrapper>
                 <StyledInput
                   type={passwordVisible ? "text" : "password"}
                   placeholder="Password"
@@ -31,10 +28,21 @@ const Login = () => {
                   {passwordVisible ? "🙈" : "👁️"}
                 </EyeToggle>
               </PasswordWrapper>
+             
+              <PasswordWrapper>
+                <StyledInput
+                  type={passwordVisible ? "text" : "password"}
+                  placeholder="Confirm Password"
+                  name="password"
+                />
+                <EyeToggle onClick={() => setPasswordVisible(!passwordVisible)}>
+                  {passwordVisible ? "🙈" : "👁️"}
+                </EyeToggle>
+              </PasswordWrapper>
 
               <SubmitButton type="submit">Login</SubmitButton>
 
-              <span>Don't have an account?<Link to="/login"> Sign up</Link> </span>
+              {/* <span>Don't have an account?<Link to="/login"> Sign up</Link> </span> */}
             </form>
           </FormCont>
       </InnerWrapper>
@@ -43,7 +51,7 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SetNewPassword;
 
 const Wrapper = styled.div`
   display: flex;

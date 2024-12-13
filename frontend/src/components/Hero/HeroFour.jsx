@@ -27,10 +27,15 @@ const HeroFour = () => {
 export default HeroFour
 
 const Wrapper = styled.div`
-    width: 100%;
-    height: calc(100vh - 140px); 
-    background-color: #F0E7D9;
-    display: flex;
+     width: 100%;
+  height: calc(100vh - 140px); 
+  max-height: 1000px; 
+  min-height: 600px; 
+  
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
 `
 const Innerwrapper = styled.div`
     width: 85%;
