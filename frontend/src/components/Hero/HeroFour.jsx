@@ -27,10 +27,12 @@ const HeroFour = () => {
 export default HeroFour
 
 const Wrapper = styled.div`
-    width: 100%;
-    height: calc(100vh - 140px); 
-    background-color: #F0E7D9;
-    display: flex;
+  width: 100%;
+  min-height: 600px; 
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
 `
 const Innerwrapper = styled.div`
     width: 85%;
@@ -40,11 +42,11 @@ const Innerwrapper = styled.div`
     justify-content: flex-end;
     align-items: center;
     gap: 20px;
+    margin-top: 100px;
 
     img {
         max-width: 400px;
         max-height: 300px;
-
     }
 `
 const Wrapcontent = styled.div`
@@ -65,18 +67,16 @@ const Wrapcontent = styled.div`
         color: white;
         border: none;
         margin: 10px 0;
-
         display: flex;
         align-items: center;
         cursor: pointer;
-        
 
         &:hover {
         background-color: #033c55;
     }
   }
 
-  a {
-    text-decoration: none;
-  }
+      a {
+        text-decoration: none;
+      }
 `

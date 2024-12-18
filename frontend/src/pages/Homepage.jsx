@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import styled, { keyframes } from "styled-components";
+import styled from "styled-components";
 import Hero from "../components/Hero/Hero";
 import HeroTwo from "../components/Hero/HeroTwo";
 import HeroThree from "../components/Hero/HeroThree";
@@ -7,8 +7,9 @@ import HeroFour from "../components/Hero/HeroFour";
 
 const Homepage = () => {
   const [currentHero, setCurrentHero] = useState(0);
+  const [prevHero, setPrevHero] = useState(null);
 
-  // Auto-scroll every 5 seconds
+  // Auto-scroll every 7 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       nextHero(); // Go to the next hero automatically
@@ -19,79 +20,67 @@ const Homepage = () => {
 
   // Go to the next hero
   const nextHero = () => {
+    setPrevHero(currentHero); // Track the previous hero
     setCurrentHero((prev) => (prev === 3 ? 0 : prev + 1));
   };
 
   // Go to the previous hero
-  const prevHero = () => {
+  const prevHeroSlide = () => {
+    setPrevHero(currentHero); // Track the current hero before switching
     setCurrentHero((prev) => (prev === 0 ? 3 : prev - 1));
   };
 
   return (
     <Slider>
-      {/* Add navigation arrows */}
-      <Arrow onClick={prevHero}>&lt;</Arrow>
+      {/* Navigation arrows */}
+      <Arrow onClick={prevHeroSlide}>&lt;</Arrow>
 
-      <Slide active={currentHero === 0}>
-        <Hero />
-      </Slide>
-      <Slide active={currentHero === 1}>
-        <HeroTwo />
-      </Slide>
-      <Slide active={currentHero === 2}>
-        <HeroThree />
-      </Slide>
-      <Slide active={currentHero === 3}>
-        <HeroFour />
-      </Slide>
+      {/* Slides */}
+      {[Hero, HeroTwo, HeroThree, HeroFour].map((Component, index) => (
+        <Slide
+          key={index}
+          active={currentHero === index}
+          prevActive={prevHero === index}
+        >
+          <Component />
+        </Slide>
+      ))}
 
       <Arrow onClick={nextHero}>&gt;</Arrow>
     </Slider>
+
+    
   );
 };
 
 export default Homepage;
 
-// Keyframe animations
-const slideIn = keyframes`
-  0% {
-    transform: translateX(-100%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-`;
-
-const slideOut = keyframes`
-  0% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-`;
-
 // Styled components
 const Slider = styled.div`
   position: relative;
   width: 100%;
-  height: calc(100vh - 140px);
+  height: 600px;
   overflow: hidden;
   display: flex;
+  justify-content: center;
   align-items: center;
+  /* margin-top: 100px; */
+  /* border: 1px solid red; */
 `;
 
 const Slide = styled.div`
   position: absolute;
   width: 100%;
   height: 100%;
-  animation: ${({ active }) => (active ? slideIn : slideOut)} 1s ease-in-out;
-  opacity: ${({ active }) => (active ? 1 : 0)};
-  transition: opacity 0.5s ease-in-out;
+  opacity: ${({ active, prevActive }) => (active || prevActive ? 1 : 0)};
+  z-index: ${({ active, prevActive }) => (active ? 10 : prevActive ? 5 : 0)};
+  transform: ${({ active, prevActive }) =>
+    active
+      ? "translateX(0)" // Current hero is centered
+      : prevActive
+      ? "translateX(-100%)" // Previous hero slides left briefly
+      : "translateX(100%)"}; // Next hero is off-screen
+  transition: all 1s ease-in-out;
 `;
 
 const Arrow = styled.div`
@@ -106,16 +95,15 @@ const Arrow = styled.div`
   height: 50px;
   width: 30px;
   background-color: rgba(0, 0, 0, 0.5);
-  /* border-radius: 50%; */
   &:hover {
     background-color: rgba(0, 0, 0, 0.7);
   }
 
   &:first-of-type {
-    left: 0px;
+    left: 10px;
   }
 
   &:last-of-type {
-    right: 0px;
+    right: 10px;
   }
 `;

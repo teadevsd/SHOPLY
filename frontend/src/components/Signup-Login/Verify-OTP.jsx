@@ -12,29 +12,16 @@ const Verify = () => {
   return (
     <Wrapper>
       <InnerWrapper>
-       
-        <SignContent>
-          <img src={signupimage} alt="Cartman Illustration" />
-
           <FormCont>
-           
             <form>
             <p>Verification details</p>
-              
               <StyledInput type="email" placeholder="Email" name="email" />
 
-             
-
-              <SubmitButton type="submit">Register</SubmitButton>
-
+              <SubmitButton type="submit">Verify</SubmitButton>
               <span>Already have an account<Link to="/login"> Sign in</Link> </span>
             </form>
           </FormCont>
-      
-
-        </SignContent>
       </InnerWrapper>
-
     </Wrapper>
   );
 };
@@ -46,27 +33,12 @@ const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 100px);
-  background: #f7f7f7;
+  background: #EDF2EE;
 `;
 
 const InnerWrapper = styled.div`
   width: 85%;
-  margin: 0 auto;
   max-width: 1200px;
-`;
-
-const SignContent = styled.div`
-/* border: 1px solid; */
-  display: flex;
-  flex-direction: row-reverse;
-  /* gap: 50px;  */
-  /* justify-content: space-between; */
-  align-items: center;
-  margin-top: 100px;
-
-  img {
-    width: 45%;
-  }
 `;
 
 const FormCont = styled.div`
@@ -75,6 +47,8 @@ const FormCont = styled.div`
   padding: 40px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
+  margin: 0 auto;
+
 
   form {
     display: flex;
@@ -102,33 +76,6 @@ const StyledInput = styled.input`
   border-radius: 4px;
 `;
 
-const StyledSelect = styled.select`
-  width: 100%;
-  padding: 12px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-`;
-
-const PasswordWrapper = styled.div`
-  position: relative;
-  display: flex;
-  align-items: center;
-
-  input {
-    width: 100%;
-    padding-right: 40px;
-  }
-`;
-
-const EyeToggle = styled.span`
-  position: absolute;
-  right: 10px;
-  cursor: pointer;
-  font-size: 16px;
-  user-select: none;
-`;
-
 const SubmitButton = styled.button`
   background-color: green;
   color: white;
@@ -145,24 +92,3 @@ const SubmitButton = styled.button`
   }
 `;
 
-const CheckboxWrapper = styled.div`
-  display: flex;
-  align-items: center;
-
-  input[type="checkbox"] {
-    /* appearance: none; */
-    width: 22px;
-    height: 22px;
-    border: 2px solid grey;
-    border-radius: 3px;
-    margin-right: 8px;
-    cursor: pointer;
-    position: relative;
-  }
-
-  label {
-    font-size: 12px;
-    cursor: pointer;
-    margin: 10px 0;
-  }
-`;

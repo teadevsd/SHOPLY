@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import shoplylogo from "/shoply.png";
+import axios from "axios";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import signupimage from "../../assets/images/png/signupimage.png";
@@ -10,18 +10,68 @@ const Signup = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [role, setRole] = useState("");
+  const [statesAndCities, setStatesAndCities] = useState({});
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+
+  useEffect(() => {
+    const fetchStatesAndCities = async () => {
+      try {
+        const response = await axios.get(
+          "https://country-state-city-search-rest-api.p.rapidapi.com/cities-by-countrycode",
+          {
+            params: { countrycode: "ng" },
+            headers: {
+              "x-rapidapi-key": "e710dc4a12mshfe42c45038eb049p10c03cjsnf6580e20f6de",
+              "x-rapidapi-host": "country-state-city-search-rest-api.p.rapidapi.com",
+            },
+          }
+        );
+  
+        console.log("API Response:", response.data); // Debugging: Log response to see structure
+  
+        // Create a mapping of states to cities
+       const stateCities = response.data.reduce((acc, item) => {
+          const { stateCode: state, name: city } = item; // Adjust to the actual keys
+          if (state) {
+            if (!acc[state]) acc[state] = [];
+            acc[state].push(city);
+          }
+          return acc;
+        }, {});
+
+        console.log(stateCities);
+
+        
+  
+        console.log("State Cities Mapping:", stateCities); // Debugging: Log state-to-cities mapping
+        setStatesAndCities(stateCities);
+      } catch (error) {
+        console.error("Error fetching states and cities:", error);
+      }
+    };
+  
+    fetchStatesAndCities();
+  }, []);
+  
+  
+  
+
+  const handleStateChange = (e) => {
+    const state = e.target.value;
+    setSelectedState(state);
+    setSelectedCity(""); // Reset city selection when state changes
+  };
 
   return (
     <Wrapper>
       <InnerWrapper>
-       
         <SignContent>
           <img src={signupimage} alt="Cartman Illustration" />
 
           <FormCont>
-           
             <form>
-            <p>Create your Shoply account</p>
+              <p>Create your Shoply account</p>
               <StyledInput type="text" placeholder="First Name" name="firstName" />
               <StyledInput type="text" placeholder="Last Name" name="lastName" />
               <StyledInput type="email" placeholder="Email" name="email" />
@@ -42,25 +92,34 @@ const Signup = () => {
                 countryCodeEditable={false}
               />
 
-              <StyledSelect
-                name="role"
-                onChange={(e) => setRole(e.target.value)}
-                value={role}
-              >
-                <option value="">Select Role</option>
-                <option value="Merchant">Merchant</option>
-                <option value="User">User</option>
-              </StyledSelect>
+                <StyledSelect
+                  name="state"
+                  onChange={handleStateChange}
+                  value={selectedState}
+                >
+                  <option value="">Select State</option>
+                  {Object.keys(statesAndCities).map((state) => (
+                    <option key={state} value={state}>
+                      {state}
+                    </option>
+                  ))}
+                </StyledSelect>
 
-              <StyledInput type="text" placeholder="BVN" name="bvn" />
+                {selectedState && (
+                  <StyledSelect
+                    name="city"
+                    onChange={(e) => setSelectedCity(e.target.value)}
+                    value={selectedCity}
+                  >
+                    <option value="">Select City</option>
+                    {statesAndCities[selectedState]?.map((city) => (
+                      <option key={city} value={city}>
+                        {city}
+                      </option>
+                    ))}
+                  </StyledSelect>
+                )}
 
-              {role === "Merchant" && (
-                <StyledInput
-                  type="text"
-                  placeholder="Business Name"
-                  name="businessName"
-                />
-              )}
 
               <PasswordWrapper>
                 <StyledInput
@@ -89,22 +148,19 @@ const Signup = () => {
               </PasswordWrapper>
 
               <CheckboxWrapper>
-              <input type="checkbox" id="terms" />
-              <label htmlFor="terms">
-              Creating an account means you’re okay with our Terms of Service, Privacy Policy, and our default Notification Settings.
-              </label>
-            </CheckboxWrapper>
+                <input type="checkbox" id="terms" />
+                <label htmlFor="terms">
+                  Creating an account means you’re okay with our Terms of Service, Privacy Policy, and our default Notification Settings.
+                </label>
+              </CheckboxWrapper>
 
               <SubmitButton type="submit">Register</SubmitButton>
 
-              <span>Already have an account<Link to="/login"> Sign in</Link> </span>
+              <span>Already have an account<Link to="/login"> Sign in</Link></span>
             </form>
           </FormCont>
-      
-
         </SignContent>
       </InnerWrapper>
-
     </Wrapper>
   );
 };
@@ -116,21 +172,19 @@ const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 100px);
-  background: #f7f7f7;
+  background: #edf2ee;
+  padding: 50px 0;
 `;
 
 const InnerWrapper = styled.div`
   width: 85%;
   margin: 0 auto;
-  max-width: 1200px;
+  max-width: 1280px;
 `;
 
 const SignContent = styled.div`
-/* border: 1px solid; */
   display: flex;
   flex-direction: row-reverse;
-  /* gap: 50px;  */
-  /* justify-content: space-between; */
   align-items: center;
   margin-top: 100px;
 
@@ -154,12 +208,12 @@ const FormCont = styled.div`
     font-weight: 500;
 
     span {
-        font-size: 12px;
+      font-size: 12px;
 
-        a {
-            text-decoration: none;
-            color: red;
-        }
+      a {
+        text-decoration: none;
+        color: red;
+      }
     }
   }
 `;
@@ -220,7 +274,6 @@ const CheckboxWrapper = styled.div`
   align-items: center;
 
   input[type="checkbox"] {
-    /* appearance: none; */
     width: 22px;
     height: 22px;
     border: 2px solid grey;

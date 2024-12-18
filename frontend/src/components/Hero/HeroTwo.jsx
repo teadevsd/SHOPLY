@@ -32,15 +32,17 @@ const HeroTwo = () => {
 export default HeroTwo
 
 const Wrapper = styled.div`
-    width: 100%;
-  height: calc(100vh - 140px); 
+  width: 100%;
+  min-height: 600px; 
+  
   background-size: cover;
   background-position: center;
   display: flex;
   align-items: center;
-`
+`;
+
 const InnerWrap = styled.div`
-      display: flex;
+    display: flex;
     align-items: center;
     justify-content: flex-end; 
     width: 85%;

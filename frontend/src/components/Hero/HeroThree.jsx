@@ -24,10 +24,10 @@ export default HeroThree
 
 const Wrapper = styled.div`
     width: 100%;
-    height: calc(100vh - 140px); 
+    height: 600px; 
     background-color: #0d0d0d;
     display: flex;
-
+    align-items: center;
 `
 const Innerwrapper = styled.div`
     /* border: 1px solid white; */
