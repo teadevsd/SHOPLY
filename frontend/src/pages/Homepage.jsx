@@ -59,11 +59,13 @@ export default Homepage;
 const Slider = styled.div`
   position: relative;
   width: 100%;
-  height: calc(100vh - 140px);
+  height: 600px;
   overflow: hidden;
   display: flex;
+  justify-content: center;
   align-items: center;
-  margin-top: 100px;
+  /* margin-top: 100px; */
+  /* border: 1px solid red; */
 `;
 
 const Slide = styled.div`

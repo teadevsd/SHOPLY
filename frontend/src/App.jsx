@@ -9,6 +9,7 @@ import Login from "./components/Signup-Login/Login";
 import SetNewPassword from "./components/Signup-Login/SetNewPassword.jsx";
 import Choosepage from "./pages/Choosepage.jsx";
 import MerchantList from "./components/Merchant-Search.jsx/MerchantList.jsx";
+import Searchpage from "./pages/Searchpage.jsx";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/new-password" element={<SetNewPassword />} />
 
 
+        <Route path="/search" element={<Searchpage />} />
         <Route path="/select-merchant" element={<Choosepage />} />
         <Route path="/merchant-lists" element={<MerchantList />} />
 

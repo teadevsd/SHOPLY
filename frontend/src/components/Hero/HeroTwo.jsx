@@ -33,9 +33,7 @@ export default HeroTwo
 
 const Wrapper = styled.div`
   width: 100%;
-  height: calc(100vh - 140px); /* Adjust based on your header height */
-  max-height: 1000px; /* Max height for larger screens */
-  min-height: 600px; /* Minimum height for smaller screens */
+  min-height: 600px; 
   
   background-size: cover;
   background-position: center;
@@ -44,7 +42,7 @@ const Wrapper = styled.div`
 `;
 
 const InnerWrap = styled.div`
-      display: flex;
+    display: flex;
     align-items: center;
     justify-content: flex-end; 
     width: 85%;

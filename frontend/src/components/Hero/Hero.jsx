@@ -23,12 +23,13 @@ export default Hero
 
 const Wrapper = styled.div`
   width: 100%;
-  height: calc(100vh - 140px); 
+  height: 600px; 
   background-image: url(${Heroimage}); 
   background-size: cover;
   background-position: center;
   display: flex;
   align-items: center;
+  
 `;
 
 const Innerwrap = styled.div`
@@ -41,11 +42,13 @@ const Innerwrap = styled.div`
 `;
 
 const Herocont = styled.div`
+  
 
   h2 {
+    margin-top: 50px;
     margin-right: 80px;
     color: white;
-    font-size: 30px;
+    font-size: 24px;
     font-weight: bold;
     line-height: 1.4; 
     padding: 20px;
