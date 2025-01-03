@@ -10,8 +10,10 @@ dotenv.config();
 
 const app = express();
 app.use(cors({
-    credentials: true, 
-    origin: process.env.FRONTEND_URL
+    origin: process.env.FRONTEND_URL,
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
+    credentials: true
 }));
 
 app.use(express.json());
@@ -26,7 +28,7 @@ const Port = 4040 || process.env.Port
 
 app.get("/", (request, response)=>{
     response.json({
-        message: "Server is running " + Port
+        message: "Server is running " + Port 
     })
 })
 

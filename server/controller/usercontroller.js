@@ -12,100 +12,124 @@ import jwt from "jsonwebtoken"
 //register user controller
 export async function registerUserController(request, response) {
     try {
-        const { name, email, password } = request.body
+        const { firstName, lastName, email, password, phoneNumber, state, city } = request.body;
 
-        if(!name || !email || !password){
+        if (!firstName || !lastName || !email || !password) {
             return response.status(400).json({
-                message: "Provide email, name, password",
+                message: "Provide required credentials!",
                 error: true,
                 success: false
-            })
-        };
-
-        const user = await UserModel.findOne({ email })
-
-        if(user){
-            return response.json({
-                message : " Already registered email",
-                error: true,
-                success: false
-            })
+            });
         }
 
-        //Hash password
-        const salt = await bcryptjs.genSalt(10)
-        const hashPassword = await bcryptjs.hash(password, salt)
+        const existingUser = await UserModel.findOne({ email });
 
-        //Save to Database
-        const payload = {
-            name, 
+        if (existingUser) {
+            return response.status(400).json({
+                message: "Email already registered",
+                error: true,
+                success: false
+            });
+        }
+
+        const salt = await bcryptjs.genSalt(10);
+        const hashPassword = await bcryptjs.hash(password, salt);
+
+        const newUser = new UserModel({
+            firstName,
+            lastName,
             email,
-            password: hashPassword
-        }
+            password: hashPassword,
+            phoneNumber,
+            state,
+            city,
+            verify_email: false // Ensure this field exists in your schema
+        });
 
-        const newUser = new UserModel(payload)
-        newUser.save();
+        await newUser.save();
 
-        //Check if email is correct - Brevo
-        const verifyEmailUrl = `${process.env.FRONTEND_URL}/verify-email?codes=${newUser?._id}`
+        const verifyEmailUrl = `${process.env.FRONTEND_URL}/verify-email?codes=${newUser._id}`;
 
-        const verifyEmail = await sendEmail({
+        await sendEmail({
             to: email,
             subject: "Verify email from Shoply!",
             html: verifyEmailTemplate({
-                name,
+                firstName,
                 url: verifyEmailUrl
             })
         });
 
         return response.json({
-            message: "User registered successfully!",
+            message: "Successfully registered! Check your mailbox to verify your email",
             error: false,
             success: true,
-            data : newUser
-        })
-
+            data: newUser
+        });
     } catch (error) {
         return response.status(500).json({
             message: error.message || error,
             error: true,
             success: false
-        })
+        });
     }
 }
+
 
 //verify user controller
 export async function verifyEmailController(request, response) {
     try {
-        const { code } = request.body
-        const user = await UserModel.findOne({_id : code})
+        const { code } = request.query; // Get the verification code from the query string
 
-        if (!user){
+        if (!code) {
             return response.status(400).json({
-                message: "Invalid code",
+                message: "Verification code is required.",
                 error: true,
                 success: false
-            })
-        };
-        //If user is valid--successful
-        const updateUser = await UserModel.updateOne({ _id : code },{
-            verify_email: true
+            });
+        }
+
+        // Find the user based on the verification code (user ID)
+        const user = await UserModel.findOne({ _id: code });
+
+        if (!user) {
+            return response.status(400).json({
+                message: "Invalid verification code.",
+                error: true,
+                success: false
+            });
+        }
+
+        // Update the user's verification status
+        const updateUser = await UserModel.updateOne({ _id: code }, {
+            $set: { verify_email: true }
         });
 
-        return response.json({
-            message: "Verification successful",
+        if (!updateUser.nModified) {
+            return response.status(400).json({
+                message: "Verification status could not be updated.",
+                error: true,
+                success: false
+            });
+        }
+
+        // Send successful response to frontend
+        return response.status(200).json({
+            message: "Email verified successfully.",
             error: false,
-            success: true
-        })
+            success: true,
+            data: { redirectUrl: `${process.env.FRONTEND_URL}/verification-successful` }
+        });
 
     } catch (error) {
         return response.status(500).json({
-            message: error.message || error,
+            message: error.message || "Internal server error.",
             error: true,
             success: false
-        })
+        });
     }
 }
+
+
 
 //login user controller
 export async function loginController(request, response) {
@@ -123,11 +147,21 @@ export async function loginController(request, response) {
 
         if(!user){
             return response.status(400).json({
-                message: "Email not found",
+                message: "Invalid email or password",
                 error: true,
                 success: false
             })
         };
+
+           // Check if email is verified
+           if (!user.verify_email) {
+            return response.status(403).json({
+                message: "Please verify your email to log in",
+                error: true,
+                success: false
+            });
+        }
+
         if(user.status !== "Active"){
             return response.status(400).json({
                 message: "Contact support",
@@ -146,24 +180,11 @@ export async function loginController(request, response) {
             })
         }
 
-        //accessToken: directly for login purpose //refreshToken: increase lifespan of accessToken
-        const accessToken = await generateAccessToken(user._id);
+        const token = await generateAccessToken(user._id);
         const refreshToken = await generateRefreshToken(user._id);
 
-        // Save refreshToken to the database
-        user.refresh_token = refreshToken; // Assign token to the user's refresh_token field
-        await user.save(); //Save the updated user object
-
-
-        //save token to cookie
-        const cookieOption = {
-            httpOnly: true,
-            secure: true,
-            sameSite: "None"
-        }
-
-        response.cookie('accessToken', accessToken, cookieOption);
-        response.cookie('refreshToken', refreshToken, cookieOption);
+        response.cookie("accessToken", token, { httpOnly: true });
+        response.cookie("refreshToken", refreshToken, { httpOnly: true });
 
         return response.json({
             message: "Login successful",
@@ -177,7 +198,7 @@ export async function loginController(request, response) {
 
     } catch (error) {
         return response.status(500).json({
-            message: error.message || error,
+            message: error.message || "Internal Server Error",
             error: true,
             success: false
         })
@@ -280,7 +301,7 @@ export async function uploadAvatarController(request, response) {
 //update user details
 export async function updateUserDetails(request, response) {
     try {
-        const { name, email, number, password} = request.body
+        const { firstName, lastName, email, phoneNumber, password} = request.body
         const userId = request.userId
 
         let hashPassword = ""
@@ -290,9 +311,10 @@ export async function updateUserDetails(request, response) {
         }
 
         const updateUser = await UserModel.updateOne({ _id : userId }, {
-            ...(name && {name : name}),
+            ...(firstName && {firstName : firstName}),
+            ...(lastName && {lastName : lastName}),
             ...(email && {email : email}),
-            ...(number && {number : number}),
+            ...(phoneNumber && {phoneNumber : phoneNumber}),
             ...(password && {password : hashPassword})
         })
 
@@ -329,7 +351,7 @@ export async function forgotPasswordController(request, response) {
     }
 
     const otp = generateOTP()
-    const expireTime = new Date() + 60 * 60 * 1000 // 1hr
+    const expireTime = new Date() + 10 * 60 * 1000 // 10mins
 
     const update = await UserModel.findByIdAndUpdate(user._id,{
         forgot_password_otp : otp,
@@ -340,7 +362,7 @@ export async function forgotPasswordController(request, response) {
         to : email,
         subject : "Forgot password from Shoply",
         html : forgotPasswordTemplate({
-            name : user.name,
+            name : user.firstName,
             otp : otp
         })
     })
@@ -379,7 +401,7 @@ export async function verifyForgotPasswordOTP(request, response) {
             return response.status(400).json({
                 message: "Email not found",
                 error: true,
-                success: false
+                success: false 
             })
         };
 

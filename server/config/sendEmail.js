@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // Check if the API key is provided
-if (!process.env.BREVO_EMAIL_API) {
+if (!process.env.BREVO_EMAIL_API) { 
   console.log("Provide BREVO_EMAIL_API in the .env file");
   process.exit(1); // Exit the process if the API key is missing
 };

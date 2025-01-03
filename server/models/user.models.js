@@ -1,25 +1,45 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-    name: {
+    firstName: {
         type : String,
-        required: [true, "provide name"] 
+        required: [true, "provide first name"] 
+    },
+    lastName: {
+        type : String,
+        required: [true, "provide first name"] 
     },
     email: {
         type : String,
-        required: [true, "provide email"] 
+        required: [true, "provide email"],
+        unique: true
     },
     password: {
         type : String,
         required: [true, "provide password"] 
     },
+    confirmPassword: {
+        type : String,
+        // required: [true, "provide password"]
+    },
     avatar: {
         type : String,
         default: ""
     },
-    number: {
-        type : Number,
-        default: null
+    phoneNumber: {
+        type : String,
+        default: null,
+        unique: true,
+        minlength: 13,
+        maxlength: 14
+    },
+    state: {
+        type : String,
+        default: ""
+    },
+    city: {
+        type : String,
+        default: ""
     },
     refresh_token: {
         type: String,

@@ -34,6 +34,8 @@ const Otpgen = () => {
     }
   };
 
+  const isOtpValid = otp.every((digit) => digit !== ""); // Checks if all OTP fields are filled
+
   return (
     <Wrapper>
       <InnerWrapper>
@@ -56,12 +58,17 @@ const Otpgen = () => {
               ))}
             </OtpInput>
 
-            <SubmitButton type="submit">Verify</SubmitButton>
+            <SubmitButton
+              type="submit"
+              className={isOtpValid ? "active" : ""}
+              disabled={!isOtpValid} // Button is disabled if OTP is not valid
+            >
+              Verify
+            </SubmitButton>
+
             <span>
-              Resend in {seconds}s{" "}
-              {seconds === 0 && (
-                <Link to="">Resend</Link> // Resend link only appears when the countdown reaches 0
-              )}
+              Didn't get code? Resend in {seconds}s{" "}
+              {seconds === 0 && <Link to="">Resend</Link>}
             </span>
           </form>
         </FormCont>
@@ -79,7 +86,7 @@ const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 100px);
-  background: #EDF2EE;
+  background: #edf2ee;
 `;
 
 const InnerWrapper = styled.div`
@@ -117,6 +124,10 @@ const FormCont = styled.div`
       }
     }
   }
+
+  @media (max-width: 768px) {
+    width: 80%;
+  }
 `;
 
 const StyledInput = styled.input`
@@ -139,18 +150,28 @@ const StyledInput = styled.input`
 `;
 
 const SubmitButton = styled.button`
-  background-color: green;
+  width: 100%;
+  background-color: gray;
   color: white;
   padding: 12px 20px;
   font-size: 16px;
   font-weight: bold;
   border: none;
   border-radius: 4px;
-  cursor: pointer;
+  cursor: not-allowed;
   transition: background-color 0.3s ease;
+
+  &.active {
+    background-color: green;
+    cursor: pointer;
+  }
 
   &:hover {
     background-color: #025b08;
+  }
+
+  &:disabled {
+    opacity: 0.6;
   }
 `;
 
