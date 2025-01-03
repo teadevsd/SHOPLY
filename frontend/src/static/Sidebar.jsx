@@ -76,7 +76,7 @@ const Sidebar = ({ setDisplay }) => {
           <nav>Contact Us</nav>
         </Styledlink>
       </Naviga>
-
+{/* 
       <Loginbutton>
         <Button>
           <button>
@@ -92,7 +92,7 @@ const Sidebar = ({ setDisplay }) => {
             </Link>
           </button>
         </Sighin>
-      </Loginbutton>
+      </Loginbutton> */}
       
     </Container>
   );
@@ -103,8 +103,8 @@ export default Sidebar;
 const Container = styled.div`
   min-height: calc(100vh - 70px);
   padding-left: 20px;
-  background-color: #edeff2;
-  margin-top: 70px;
+  background-color: #edf2ee;
+  margin-top: 110px;
 `;
 
 const Naviga = styled.div``;

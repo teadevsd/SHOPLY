@@ -1,72 +1,136 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
-// import signupimage from "../../assets/images/png/signupimage.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import SummaryAPI from "../../common/SummaryAPI";
+import toast from "react-hot-toast";
+import AxiosToastError from "../../utilitis/AxiosToastError";
+import Axios from "../../utilitis/Axios";
 
 const Login = () => {
-  const [passwordVisible, setPasswordVisible] = useState(false);
-  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-  const [role, setRole] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
+  const navigate = useNavigate();
+
+
+  const [passwordVisible, setPasswordVisible] = useState(false);
+
+
+  // Check if both email and password fields are filled
+  const validValue = formData.email.trim() !== "" && formData.password.trim() !== "";
+
+  // Handle input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleUserInput = async (e) => {
+    e.preventDefault();
+  
+    try {
+      const response = await Axios({
+        ...SummaryAPI.login,
+        data: formData,
+      });
+  
+      if (response.data.error) {
+        toast.error(response.data.message); // This will show the error message from the backend
+      } else {
+        toast.success(response.data.message);
+        setFormData({
+          email: "",
+          password: "",
+        });
+        navigate("/select-merchant");
+      }
+    } catch (error) {
+      AxiosToastError(error); // Catch other errors and display with toast
+    }
+  };
+  
   return (
     <Wrapper>
       <InnerWrapper>
-
-          <FormCont>
-            <form>
+        <FormCont>
+          <form onSubmit={handleUserInput}>
             <p>Login to Shoply account</p>
-              
-              <StyledInput type="email" placeholder="Email" name="email" />
-             
-              <PasswordWrapper>
-                <StyledInput
-                  type={passwordVisible ? "text" : "password"}
-                  placeholder="Password"
-                  name="password"
-                />
-                <EyeToggle onClick={() => setPasswordVisible(!passwordVisible)}>
-                  {passwordVisible ? "🙈" : "👁️"}
-                </EyeToggle>
-              </PasswordWrapper>
 
-              <SubmitButton type="submit">Login</SubmitButton>
+            <StyledInput
+              type="email"
+              placeholder="Email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+            />
 
-              <span>Don't have an account?<Link to="/login"> Sign up</Link> </span>
-            </form>
-          </FormCont>
+            <PasswordWrapper>
+              <StyledInput
+                type={passwordVisible ? "text" : "password"}
+                placeholder="Password"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+              />
+              <EyeToggle onClick={() => setPasswordVisible(!passwordVisible)}>
+                {passwordVisible ? "🙈" : "👁️"}
+              </EyeToggle>
+            </PasswordWrapper>
+
+            <Link to="/verify-email">
+              <p>Forgot password</p>
+            </Link>
+
+            <SubmitButton
+              className={`${validValue ? "active" : ""}`}
+              disabled={!validValue}
+            >
+              Login
+            </SubmitButton>
+
+            <span>
+              Don't have an account? <Link to="/signup">Sign up</Link>
+            </span>
+          </form>
+        </FormCont>
       </InnerWrapper>
-
     </Wrapper>
   );
 };
 
 export default Login;
 
+// Styled Components (no changes)
 const Wrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 100px);
-  background: #EDF2EE;
+  background: #edf2ee;
 `;
 
 const InnerWrapper = styled.div`
   width: 85%;
-  /* margin: 0 auto; */
   max-width: 1200px;
 `;
 
-
 const FormCont = styled.div`
- margin: 0 auto;
+  margin: 0 auto;
   background-color: #fff;
   width: 40%;
   padding: 40px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
+
+  p:nth-last-child(1) {
+    font-size: 12px;
+    color: red;
+  }
 
   form {
     display: flex;
@@ -76,13 +140,21 @@ const FormCont = styled.div`
     font-weight: 500;
 
     span {
-        font-size: 12px;
+      font-size: 12px;
 
-        a {
-            text-decoration: none;
-            color: red;
-        }
+      a {
+        text-decoration: none;
+        color: red;
+      }
     }
+
+    a {
+      text-decoration: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    width: 80%;
   }
 `;
 
@@ -127,5 +199,13 @@ const SubmitButton = styled.button`
   &:hover {
     background-color: #025b08;
   }
-`;
 
+  &.active {
+    background-color: green;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+`;

@@ -3,16 +3,141 @@ import styled from "styled-components";
 import axios from "axios";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
-import signupimage from "../../assets/images/png/signupimage.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import Axios from "../../utilitis/Axios";
+import SummaryAPI from "../../common/SummaryAPI";
+import AxiosToastError from "../../utilitis/AxiosToastError";
+import { isValidPhoneNumber, parsePhoneNumberFromString } from 'libphonenumber-js';
 
 const Signup = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-  const [role, setRole] = useState("");
   const [statesAndCities, setStatesAndCities] = useState({});
-  const [selectedState, setSelectedState] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
+  const [isCheckedBoxChecked, setIsCheckedBoxChecked] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [setData, setSetData] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        phoneNumber: "",
+        state: "",
+        city: "",
+      });
+
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    // Update state
+    setSetData({
+      ...setData,
+      [name]: value,
+    });
+
+    // Error handling logic
+    const newErrors = { ...errors };
+
+    // First Name validation
+    if (name === "firstName" && (value.length < 3 || value.length > 8)) {
+      newErrors.firstName = "First name should include 3-8 characters";
+    } else {
+      delete newErrors.firstName;
+    }
+
+    // Last Name validation
+    if (name === "lastName" && (value.length < 3 || value.length > 8)) {
+      newErrors.lastName = "Last name should include 3-8 characters";
+    } else {
+      delete newErrors.lastName;
+    }
+
+    // Email validation
+    if (name === "email" && !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)) {
+      newErrors.email = "Enter a valid email";
+    } else {
+      delete newErrors.email;
+    }
+
+      // Phone Number Validation
+    if (name === "phoneNumber") {
+      const phoneNumberParsed = parsePhoneNumberFromString(value); // Parse the phone number
+    
+      if (!phoneNumberParsed) {
+        newErrors.phoneNumber = "Please enter a valid phone number";
+      } else {
+        // Check if the phone number is valid and if the country code matches the length
+        if (!isValidPhoneNumber(value)) {
+          newErrors.phoneNumber = "Please enter a valid phone number";
+        } else {
+          delete newErrors.phoneNumber;
+        }
+      }
+    }
+    
+    // Password validation
+    if (name === "password") {
+      const passwordPattern = /^(?=.*\d)(?=.*[!@#$%^&*])[a-zA-Z\d!@#$%^&*]{6,16}$/;
+      if (!passwordPattern.test(value)) {
+        newErrors.password =
+          "Password must be 6-16 characters, including at least one digit and one special character (!@#$%^&*)";
+      } else {
+        delete newErrors.password;
+      }
+    }
+
+    // Confirm Password validation
+    if (name === "confirmPassword" && value !== setData.password) {
+      newErrors.confirmPassword = "Passwords do not match";
+    } else {
+      delete newErrors.confirmPassword;
+    }
+
+    setErrors(newErrors);
+  };
+
+  const validValue =
+    Object.values(setData).every((el) => el) &&
+    Object.keys(errors).length === 0 &&
+    isCheckedBoxChecked;
+
+  const handleUserInput = async (e) => {
+    e.preventDefault();
+
+    if (setData.password !== setData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    try {
+      const response = await Axios({
+        ...SummaryAPI.register,
+        data: setData,
+      });
+
+      if (response.data.error) {
+        toast.error(response.data.message);
+      } else {
+        toast.success(response.data.message);
+        setSetData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          phoneNumber: "",
+          state: "",
+          city: "",
+        });
+        navigate("/check-your-mail");
+      }
+    } catch (error) {
+      AxiosToastError(error);
+    }
+  };
 
   useEffect(() => {
     const fetchStatesAndCities = async () => {
@@ -27,12 +152,9 @@ const Signup = () => {
             },
           }
         );
-  
-        console.log("API Response:", response.data); // Debugging: Log response to see structure
-  
-        // Create a mapping of states to cities
-       const stateCities = response.data.reduce((acc, item) => {
-          const { stateCode: state, name: city } = item; // Adjust to the actual keys
+
+        const stateCities = response.data.reduce((acc, item) => {
+          const { stateCode: state, name: city } = item;
           if (state) {
             if (!acc[state]) acc[state] = [];
             acc[state].push(city);
@@ -40,41 +162,52 @@ const Signup = () => {
           return acc;
         }, {});
 
-        console.log(stateCities);
-
-        
-  
-        console.log("State Cities Mapping:", stateCities); // Debugging: Log state-to-cities mapping
         setStatesAndCities(stateCities);
       } catch (error) {
         console.error("Error fetching states and cities:", error);
       }
     };
-  
+
     fetchStatesAndCities();
   }, []);
-  
-  
-  
-
-  const handleStateChange = (e) => {
-    const state = e.target.value;
-    setSelectedState(state);
-    setSelectedCity(""); // Reset city selection when state changes
-  };
 
   return (
     <Wrapper>
       <InnerWrapper>
         <SignContent>
-          <img src={signupimage} alt="Cartman Illustration" />
-
+          
           <FormCont>
-            <form>
+            <form onSubmit={handleUserInput}>
               <p>Create your Shoply account</p>
-              <StyledInput type="text" placeholder="First Name" name="firstName" />
-              <StyledInput type="text" placeholder="Last Name" name="lastName" />
-              <StyledInput type="email" placeholder="Email" name="email" />
+              <StyledInput
+                type="text"
+                placeholder="First Name"
+                name="firstName"
+                value={setData.firstName}
+                onChange={handleChange}
+                />
+                <span className="error">{errors.username}</span>
+               
+
+              <StyledInput
+                type="text"
+                placeholder="Last Name"
+                name="lastName"
+                value={setData.lastName}
+                onChange={handleChange}
+              />
+              <span className="error">{errors.username}</span>
+             
+
+              <StyledInput
+                type="email"
+                placeholder="Email"
+                name="email"
+                value={setData.email}
+                onChange={handleChange}
+              />
+              <span className="error">{errors.username}</span>
+            
 
               <PhoneInput
                 country={"ng"}
@@ -84,52 +217,61 @@ const Signup = () => {
                   fontSize: "14px",
                   border: "1px solid #ccc",
                   borderRadius: "4px",
-                  paddingLeft: "45px"
+                  paddingLeft: "45px",
                 }}
-                containerStyle={{
-                  textAlign: "left",
-                }}
-                countryCodeEditable={false}
+                name="phoneNumber"
+                value={setData.phoneNumber}
+                onChange={(value) =>
+                  setSetData((prevState) => ({
+                    ...prevState,
+                    phoneNumber: value,
+                  }))
+                }
               />
+              <span className="error">{errors.username}</span>
+              
 
+              <StyledSelect
+                name="state"
+                onChange={(e) => handleChange(e)}
+                value={setData.state}
+              >
+                <option value="">Select State</option>
+                {Object.keys(statesAndCities).map((state) => (
+                  <option key={state} value={state}>
+                    {state}
+                  </option>
+                ))}
+              </StyledSelect>
+              {setData.state && (
                 <StyledSelect
-                  name="state"
-                  onChange={handleStateChange}
-                  value={selectedState}
+                  name="city"
+                  onChange={(e) => handleChange(e)}
+                  value={setData.city}
                 >
-                  <option value="">Select State</option>
-                  {Object.keys(statesAndCities).map((state) => (
-                    <option key={state} value={state}>
-                      {state}
+                  <option value="">Select City</option>
+                  {statesAndCities[setData.state]?.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
                     </option>
                   ))}
                 </StyledSelect>
-
-                {selectedState && (
-                  <StyledSelect
-                    name="city"
-                    onChange={(e) => setSelectedCity(e.target.value)}
-                    value={selectedCity}
-                  >
-                    <option value="">Select City</option>
-                    {statesAndCities[selectedState]?.map((city) => (
-                      <option key={city} value={city}>
-                        {city}
-                      </option>
-                    ))}
-                  </StyledSelect>
-                )}
-
-
+              )}
               <PasswordWrapper>
                 <StyledInput
                   type={passwordVisible ? "text" : "password"}
                   placeholder="Password"
                   name="password"
+                  value={setData.password}
+                  onChange={handleChange}
                 />
                 <EyeToggle onClick={() => setPasswordVisible(!passwordVisible)}>
                   {passwordVisible ? "🙈" : "👁️"}
                 </EyeToggle>
+
+                <span className="error">{errors.username}</span>
+               
+
               </PasswordWrapper>
 
               <PasswordWrapper>
@@ -137,6 +279,8 @@ const Signup = () => {
                   type={confirmPasswordVisible ? "text" : "password"}
                   placeholder="Confirm Password"
                   name="confirmPassword"
+                  value={setData.confirmPassword}
+                  onChange={handleChange}
                 />
                 <EyeToggle
                   onClick={() =>
@@ -145,18 +289,33 @@ const Signup = () => {
                 >
                   {confirmPasswordVisible ? "🙈" : "👁️"}
                 </EyeToggle>
+                <span className="error">{errors.username}</span>
+                <br />
               </PasswordWrapper>
-
               <CheckboxWrapper>
-                <input type="checkbox" id="terms" />
+                <input
+                  type="checkbox"
+                  id="terms"
+                  checked={isCheckedBoxChecked}
+                  onChange={() =>
+                    setIsCheckedBoxChecked(!isCheckedBoxChecked)
+                  }
+                />
                 <label htmlFor="terms">
-                  Creating an account means you’re okay with our Terms of Service, Privacy Policy, and our default Notification Settings.
+                  Creating an account means you’re okay with our Terms of
+                  Service, Privacy Policy, and our default Notification
+                  Settings.
                 </label>
               </CheckboxWrapper>
-
-              <SubmitButton type="submit">Register</SubmitButton>
-
-              <span>Already have an account<Link to="/login"> Sign in</Link></span>
+              <SubmitButton
+                className={`${validValue ? "active" : ""}`}
+                disabled={!validValue}
+              >
+                Register
+              </SubmitButton>
+              <span>
+                Already have an account?<Link to="/login"> Sign in</Link>
+              </span>
             </form>
           </FormCont>
         </SignContent>
@@ -186,10 +345,18 @@ const SignContent = styled.div`
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
+  justify-content: center;
   margin-top: 100px;
 
   img {
     width: 45%;
+  }
+
+  @media (max-width: 768px) {
+
+    img {
+      display: none;
+    }
   }
 `;
 
@@ -203,7 +370,7 @@ const FormCont = styled.div`
   form {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     font-size: 20px;
     font-weight: 500;
 
@@ -216,6 +383,14 @@ const FormCont = styled.div`
       }
     }
   }
+
+  /* .error{
+    color: red;
+} */
+
+  @media (max-width: 768px) {
+    width: 80%;
+  }
 `;
 
 const StyledInput = styled.input`
@@ -224,6 +399,7 @@ const StyledInput = styled.input`
   font-size: 12px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  outline: none;
 `;
 
 const StyledSelect = styled.select`
@@ -266,6 +442,15 @@ const SubmitButton = styled.button`
 
   &:hover {
     background-color: #025b08;
+  }
+
+  &.active {
+    background-color: green;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
   }
 `;
 
