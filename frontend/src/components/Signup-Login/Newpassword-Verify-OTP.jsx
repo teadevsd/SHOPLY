@@ -4,84 +4,93 @@ import "react-phone-input-2/lib/style.css";
 import { Link, useNavigate } from "react-router-dom";
 import Axios from "../../utilitis/Axios";
 import SummaryAPI from "../../common/SummaryAPI";
-import toast from "react-hot-toast";	
+import toast from "react-hot-toast";
+import AxiosToastError from "../../utilitis/AxiosToastError";
+import { useAppContext } from "../../common/AuthContext";
 
 const VerifyEmailOTP = () => {
-  const [email, setEmail] = useState("");
-  const isEmailValid = email.trim() !== "";
-
+  const {setEmail } = useAppContext();
   const [data, setData] = useState({
-    email : ""
+    email: "",
   });
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    const { name, value} =e.target
-
-    setData((preve) => {
-      return {
-        ...preve,
-        [name]: value
-      }
-    })
-  }
+    const { name, value } = e.target;
+    setData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
-      const response = await Axios({
-        ...SummaryAPI.forgotPassword,
-        data: data
-      })
-
-      if(!data.email.trim()) {
-        toast.error('Email is required');
+      if (!data.email.trim()) {
+        toast.error("Email is required");
         return;
       }
 
-      if( response.data.error) {
-        toast.error(error.message || "Something went wrong");
+      const response = await Axios({
+        ...SummaryAPI.forgotPassword,
+        data: data,
+      });
+
+      if (response.data.error) {
+        toast.error(response.data.message || "Something went wrong");
+        return;
       }
+
       if (response.data.success) {
-        toast.success(response.data.message)
+        toast.success(response.data.message);
+        setEmail(data.email);
         setData({
-          email : ""
-        })
-        navigate("/verification-otp")
+          email: "",
+        });
+        navigate("/otp-verification");
       }
     } catch (error) {
-      return response.status(500).json({
-        message: error.message || error,
-        error: true,
-        success: false
-      })
+      AxiosToastError(error);
     }
-  }
+  };
+
+  const isEmailValid = data.email.trim() !== "";
 
   return (
     <Wrapper>
       <InnerWrapper>
-          <FormCont>
-            <form onSubmit={handleSubmit}>
-            <p>Verification details</p>
-              <StyledInput type="email" placeholder="Email" name="email" value={data.email} onChange={(e) =>setEmail(e.target.value)}/>
-
-              <SubmitButton type="submit"
-              className= {isEmailValid ? "active" : ""} 
+        <FormCont>
+          <form onSubmit={handleSubmit}>
+            <p>Forgot Password</p>
+            <StyledInput
+              type="email"
+              placeholder="Enter your Registerd Email"
+              name="email"
+              value={data.email}
+              onChange={handleChange}
+            />
+            <SubmitButton
+              type="submit"
+              className={isEmailValid ? "active" : ""}
               disabled={!isEmailValid}
-              onClick={handleChange}
-              >
-              Verify</SubmitButton>
-              {/* <span>Already have an account<Link to="/login"> Sign in</Link> </span> */}
-            </form>
-          </FormCont>
+            >
+              Verify
+            </SubmitButton>
+
+            <span>
+              Already have an account? <Link to="/login">Login</Link>
+            </span>
+
+          </form>
+        </FormCont>
       </InnerWrapper>
     </Wrapper>
   );
 };
 
 export default VerifyEmailOTP;
+
 
 const Wrapper = styled.div`
   display: flex;

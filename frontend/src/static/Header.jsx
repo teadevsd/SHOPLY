@@ -8,9 +8,12 @@ import { TypeAnimation } from 'react-type-animation';
 import { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import { IoReorderTwoOutline } from "react-icons/io5";
+import { useSelector } from "react-redux";
 
 const Header = () => {
   const [toggle, setToggle] = useState(false);
+  const user = useSelector((state) => state?.user)
+  console.log('user from store', user)
 
   const handleToggle = () => {
     setToggle(!toggle);

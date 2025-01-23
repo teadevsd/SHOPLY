@@ -16,6 +16,26 @@ const SummaryAPI = {
     forgotPassword: {
         url : 'api/v1/user/forgot-password',
         method : 'put'
+    },
+    otpVerification: {
+        url : 'api/v1/user/verify-forgot-password-OTP',
+        method : 'put'
+    },
+    resendOtp: {
+        url : 'api/v1/user/resend-otp',
+        method : 'post'
+    },
+    resetPassword: {
+        url : 'api/v1/user/reset-password',
+        method : 'patch'
+    },
+    refreshToken: {
+        url : 'api/v1/user/refresh-token',
+        method : 'post'
+    },
+    userDetails: {
+        url : 'api/v1/user/user-details',	
+        method : 'get'
     }
 
 }

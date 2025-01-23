@@ -1,57 +1,49 @@
-import React, { useEffect } from "react";
-import styled from "styled-components";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import styled from 'styled-components';
+import axios from 'axios';
 import { GoVerified } from "react-icons/go";
+import { useAppContext } from '../../common/AuthContext';
 
-import toast from "react-hot-toast";
-import AxiosToastError from "../../utilitis/AxiosToastError";
-import Axios from "../../utilitis/Axios";
-import SummaryAPI from "../../common/SummaryAPI";
 
-const VerifiedMail = () => {
+const VerifyEmail = () => {
+  const [searchParams] = useSearchParams();
+  const verificationCode = searchParams.get('codes');
   const navigate = useNavigate();
-  const location = useLocation();
-  const verificationCode = new URLSearchParams(location.search).get("codes");
+  const { setIsVerified } = useAppContext();
 
   useEffect(() => {
-    const verifyEmail = async () => {
-      try {
-        // Call your backend API to verify the email with the code
-        const response = await Axios({
-          ...SummaryAPI.verifyEmail,
-          data: { code: verificationCode }
-        });
+      const verifyEmail = async () => {
+          if (!verificationCode) return;
 
-        if (response.data.success) {
-          toast.success("Email verified successfully!");
-          // Redirect to the 'verification-successful' page
-          navigate("/verification-successful");
-        } else {
-          toast.error(response.data.message || "Verification failed.");
-        }
-      } catch (error) {
-        AxiosToastError(error);
-      }
-    };
+          try {
+              const response = await axios.get(`/api/verify-email?codes=${verificationCode}`);
+              toast.success(response.data.message || 'Email verified successfully.');
+              setIsVerified(true);
+              setTimeout(() => navigate('/login'), 3000); // Redirect to login page after 3 seconds
+          } catch (error) {
+              const errorMessage = error.response?.data?.message || 'Something went wrong.';
+              toast.error(errorMessage);
+          }
+      };
 
-    if (verificationCode) {
       verifyEmail();
-    }
-  }, [verificationCode, navigate]);
+  }, [verificationCode, navigate, setIsVerified]);
 
-  return (
-    <Wrapper>
-      <InnerWrapper>
-        <FormCont>
-          <GoVerified />
-          <p>Email Verified Successfully! You can now Login!</p>
-        </FormCont>
-      </InnerWrapper>
-    </Wrapper>
-  );
+    return (
+        <Wrapper>
+            <InnerWrapper>
+                <FormCont>
+                    <GoVerified />
+                    <p>Email Verified Successfully! You can now Login!</p>
+                </FormCont>
+            </InnerWrapper>
+        </Wrapper>
+    );
 };
 
-export default VerifiedMail;
+export default VerifyEmail;
 
 // Styled Components
 const Wrapper = styled.div`

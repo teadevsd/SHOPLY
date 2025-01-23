@@ -1,13 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // Import the navigate hook
+import AxiosToastError from "../../utilitis/AxiosToastError";
+import Axios from "../../utilitis/Axios";
+import SummaryAPI from "../../common/SummaryAPI";
+import toast from "react-hot-toast";
+import { useAppContext } from "../../common/AuthContext";
 
 const SetNewPassword = () => {
+  const { email, setEmail } = useAppContext(); // Get email directly from context
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [errors, setErrors] = useState({});
   const [newPassword, setNewPassword] = useState({
-    password: "",
+    newPassword: "",
     confirmPassword: "",
   });
+
+  const navigate = useNavigate(); // Initialize navigate hook
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -15,32 +24,89 @@ const SetNewPassword = () => {
       ...prevData,
       [name]: value,
     }));
+
+    const newErrors = { ...errors };
+
+    if (name === "newPassword") {
+      const passwordPattern = /^(?=.*\d)(?=.*[!@#$%^&*])[a-zA-Z\d!@#$%^&*]{6,16}$/;
+      if (!passwordPattern.test(value)) {
+        newErrors.newPassword = "Password must be 6-16 characters, including at least one digit and one special character (!@#$%^&*)";
+      } else {
+        delete newErrors.newPassword;
+      }
+    }
+
+    // Confirm Password validation
+    if (name === "confirmPassword" && value !== newPassword.newPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    } else {
+      delete newErrors.confirmPassword;
+    }
+
+    setErrors(newErrors);
   };
 
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Log data to see if it's structured correctly
+    console.log({
+      email,
+      newPassword: newPassword.newPassword,
+      confirmPassword: newPassword.confirmPassword,
+    });
+
+    try {
+      const response = await Axios({
+        ...SummaryAPI.resetPassword,
+        data: {
+          email, // Ensure email is passed correctly
+          newPassword: newPassword.newPassword,
+          confirmPassword: newPassword.confirmPassword,
+        },
+      });
+
+      if (response.data.error) {
+        toast.error(response.data.message || 'Something went wrong');
+      }
+
+      if (response.data.success) {
+        toast.success(response.data.message || 'Password changed successfully');
+        setEmail(email); // Set the email in context after successful reset
+        navigate("/login"); // Navigate to login page after successful reset
+      }
+
+    } catch (error) {
+      AxiosToastError(error);
+    }
+};
+
+
   const isButtonDisabled =
-    !newPassword.password ||
+    !newPassword.newPassword ||
     !newPassword.confirmPassword ||
-    newPassword.password !== newPassword.confirmPassword;
+    newPassword.newPassword !== newPassword.confirmPassword;
 
   return (
     <Wrapper>
       <InnerWrapper>
         <FormCont>
-          <form>
+          <form onSubmit={handleSubmit}>
             <p>Set new password for your Shoply account</p>
 
             <PasswordWrapper>
               <StyledInput
                 type={passwordVisible ? "text" : "password"}
-                placeholder="Password"
-                name="password"
-                value={newPassword.password}
+                placeholder="New Password"
+                name="newPassword"
+                value={newPassword.newPassword}
                 onChange={handleInputChange}
               />
               <EyeToggle onClick={() => setPasswordVisible(!passwordVisible)}>
                 {passwordVisible ? "🙈" : "👁️"}
               </EyeToggle>
             </PasswordWrapper>
+            {errors.newPassword && <span className="error">{errors.newPassword}</span>}
 
             <PasswordWrapper>
               <StyledInput
@@ -55,15 +121,15 @@ const SetNewPassword = () => {
               </EyeToggle>
             </PasswordWrapper>
 
-            <Link to={isButtonDisabled ? "#" : "/login"}>
-              <SubmitButton 
-                type="submit" 
-                disabled={isButtonDisabled} 
-                active={!isButtonDisabled} // Pass active prop
-              >
-                Login
-              </SubmitButton>
-            </Link>
+            {errors.confirmPassword && <span className="error">{errors.confirmPassword}</span>}
+
+            <SubmitButton
+              type="submit"
+              disabled={isButtonDisabled}
+              active={!isButtonDisabled}
+            >
+              Create New Password
+            </SubmitButton>
           </form>
         </FormCont>
       </InnerWrapper>
@@ -71,7 +137,10 @@ const SetNewPassword = () => {
   );
 };
 
+
+
 export default SetNewPassword;
+
 
 // Styled Components
 const Wrapper = styled.div`
@@ -101,6 +170,11 @@ const FormCont = styled.div`
     gap: 15px;
     font-size: 20px;
     font-weight: 500;
+
+    span {
+      font-size: 12px;
+      color: red;
+    }
   }
 
   @media (max-width: 768px) {

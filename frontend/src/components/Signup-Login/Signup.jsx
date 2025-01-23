@@ -9,8 +9,10 @@ import Axios from "../../utilitis/Axios";
 import SummaryAPI from "../../common/SummaryAPI";
 import AxiosToastError from "../../utilitis/AxiosToastError";
 import { isValidPhoneNumber, parsePhoneNumberFromString } from 'libphonenumber-js';
+import { useAppContext } from "../../common/AuthContext";
 
 const Signup = () => {
+  const { setEmail } = useAppContext();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [statesAndCities, setStatesAndCities] = useState({});
@@ -62,7 +64,7 @@ const Signup = () => {
       delete newErrors.email;
     }
 
-      // Phone Number Validation
+    // Phone Number Validation
     if (name === "phoneNumber") {
       const phoneNumberParsed = parsePhoneNumberFromString(value); // Parse the phone number
     
@@ -77,7 +79,7 @@ const Signup = () => {
         }
       }
     }
-    
+
     // Password validation
     if (name === "password") {
       const passwordPattern = /^(?=.*\d)(?=.*[!@#$%^&*])[a-zA-Z\d!@#$%^&*]{6,16}$/;
@@ -106,6 +108,7 @@ const Signup = () => {
 
   const handleUserInput = async (e) => {
     e.preventDefault();
+    setEmail(setData.email);
 
     if (setData.password !== setData.confirmPassword) {
       toast.error("Passwords do not match");
@@ -121,6 +124,8 @@ const Signup = () => {
       if (response.data.error) {
         toast.error(response.data.message);
       } else {
+        setEmail(setData.email);
+        
         toast.success(response.data.message);
         setSetData({
           firstName: "",
@@ -132,7 +137,7 @@ const Signup = () => {
           state: "",
           city: "",
         });
-        navigate("/check-your-mail");
+        navigate("/login");
       }
     } catch (error) {
       AxiosToastError(error);
@@ -175,7 +180,6 @@ const Signup = () => {
     <Wrapper>
       <InnerWrapper>
         <SignContent>
-          
           <FormCont>
             <form onSubmit={handleUserInput}>
               <p>Create your Shoply account</p>
@@ -185,9 +189,8 @@ const Signup = () => {
                 name="firstName"
                 value={setData.firstName}
                 onChange={handleChange}
-                />
-                <span className="error">{errors.username}</span>
-               
+              />
+              {errors.firstName && <span className="error">{errors.firstName}</span>}
 
               <StyledInput
                 type="text"
@@ -196,8 +199,7 @@ const Signup = () => {
                 value={setData.lastName}
                 onChange={handleChange}
               />
-              <span className="error">{errors.username}</span>
-             
+              {errors.lastName && <span className="error">{errors.lastName}</span>}
 
               <StyledInput
                 type="email"
@@ -206,16 +208,15 @@ const Signup = () => {
                 value={setData.email}
                 onChange={handleChange}
               />
-              <span className="error">{errors.username}</span>
-            
+              {errors.email && <span className="error">{errors.email}</span>}
 
               <PhoneInput
                 country={"ng"}
                 inputStyle={{
                   width: "100%",
                   padding: "12px",
-                  fontSize: "14px",
-                  border: "1px solid #ccc",
+                  fontSize: "12px",
+                  border: "1px solid grey",
                   borderRadius: "4px",
                   paddingLeft: "45px",
                 }}
@@ -227,9 +228,30 @@ const Signup = () => {
                     phoneNumber: value,
                   }))
                 }
+                onBlur={() => {
+                  const newErrors = { ...errors };
+                  const phoneNumber = setData.phoneNumber;
+
+                  try {
+                    const phoneNumberParsed = parsePhoneNumberFromString(phoneNumber, "NG");
+
+                    if (!phoneNumberParsed || !phoneNumberParsed.isValid()) {
+                      newErrors.phoneNumber = "Please enter a valid phone number";
+                    } else if (phoneNumberParsed.number.length < 10) {
+                      newErrors.phoneNumber = "Phone number must be at least 10 digits long";
+                    } else if (phoneNumberParsed.number.length > 15) {
+                      newErrors.phoneNumber = "Phone number must not exceed 15 digits";
+                    } else {
+                      delete newErrors.phoneNumber;
+                    }
+                  } catch (error) {
+                    newErrors.phoneNumber = "Please enter a valid phone number";
+                  }
+
+                  setErrors(newErrors);
+                }}
               />
-              <span className="error">{errors.username}</span>
-              
+              {errors.phoneNumber && <span className="error">{errors.phoneNumber}</span>}
 
               <StyledSelect
                 name="state"
@@ -243,6 +265,7 @@ const Signup = () => {
                   </option>
                 ))}
               </StyledSelect>
+
               {setData.state && (
                 <StyledSelect
                   name="city"
@@ -257,6 +280,7 @@ const Signup = () => {
                   ))}
                 </StyledSelect>
               )}
+
               <PasswordWrapper>
                 <StyledInput
                   type={passwordVisible ? "text" : "password"}
@@ -265,14 +289,12 @@ const Signup = () => {
                   value={setData.password}
                   onChange={handleChange}
                 />
-                <EyeToggle onClick={() => setPasswordVisible(!passwordVisible)}>
+                
+                <EyeIcon onClick={() => setPasswordVisible(!passwordVisible)}>
                   {passwordVisible ? "🙈" : "👁️"}
-                </EyeToggle>
-
-                <span className="error">{errors.username}</span>
-               
-
+                </EyeIcon>
               </PasswordWrapper>
+              {errors.password && <span className="error">{errors.password}</span>}
 
               <PasswordWrapper>
                 <StyledInput
@@ -282,40 +304,31 @@ const Signup = () => {
                   value={setData.confirmPassword}
                   onChange={handleChange}
                 />
-                <EyeToggle
-                  onClick={() =>
-                    setConfirmPasswordVisible(!confirmPasswordVisible)
-                  }
-                >
+               
+                <EyeIcon onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}>
                   {confirmPasswordVisible ? "🙈" : "👁️"}
-                </EyeToggle>
-                <span className="error">{errors.username}</span>
-                <br />
+                </EyeIcon>
               </PasswordWrapper>
-              <CheckboxWrapper>
-                <input
+               {errors.confirmPassword && (
+                  <span className="error">{errors.confirmPassword}</span>
+                )}
+
+              <CheckboxContainer>
+                <Checkbox
                   type="checkbox"
-                  id="terms"
-                  checked={isCheckedBoxChecked}
-                  onChange={() =>
-                    setIsCheckedBoxChecked(!isCheckedBoxChecked)
-                  }
+                  name="acceptTerms"
+                  onChange={() => setIsCheckedBoxChecked(!isCheckedBoxChecked)}
                 />
-                <label htmlFor="terms">
-                  Creating an account means you’re okay with our Terms of
-                  Service, Privacy Policy, and our default Notification
-                  Settings.
-                </label>
-              </CheckboxWrapper>
-              <SubmitButton
-                className={`${validValue ? "active" : ""}`}
+                <label htmlFor="acceptTerms">I accept the Terms & Conditions</label>
+              </CheckboxContainer>
+
+              <StyledButton
+                type="submit"
                 disabled={!validValue}
+                style={{ cursor: validValue ? "pointer" : "not-allowed" }}
               >
-                Register
-              </SubmitButton>
-              <span>
-                Already have an account?<Link to="/login"> Sign in</Link>
-              </span>
+                Sign Up
+              </StyledButton>
             </form>
           </FormCont>
         </SignContent>
@@ -325,6 +338,7 @@ const Signup = () => {
 };
 
 export default Signup;
+
 
 const Wrapper = styled.div`
   display: flex;
@@ -384,9 +398,9 @@ const FormCont = styled.div`
     }
   }
 
-  /* .error{
+  .error{
     color: red;
-} */
+}
 
   @media (max-width: 768px) {
     width: 80%;
@@ -421,7 +435,7 @@ const PasswordWrapper = styled.div`
   }
 `;
 
-const EyeToggle = styled.span`
+const EyeIcon = styled.span`
   position: absolute;
   right: 10px;
   cursor: pointer;
@@ -429,7 +443,13 @@ const EyeToggle = styled.span`
   user-select: none;
 `;
 
-const SubmitButton = styled.button`
+const Checkbox = styled.input`
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+`;
+
+const StyledButton = styled.button`
   background-color: green;
   color: white;
   padding: 12px 20px;
@@ -454,7 +474,7 @@ const SubmitButton = styled.button`
   }
 `;
 
-const CheckboxWrapper = styled.div`
+const CheckboxContainer = styled.div`
   display: flex;
   align-items: center;
 
@@ -474,3 +494,5 @@ const CheckboxWrapper = styled.div`
     margin: 10px 0;
   }
 `;
+
+

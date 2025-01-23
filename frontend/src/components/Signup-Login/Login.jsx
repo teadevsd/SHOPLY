@@ -1,22 +1,22 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { Link, useNavigate } from "react-router-dom";
-import SummaryAPI from "../../common/SummaryAPI";
+import SummaryAPI, { baseURL } from "../../common/SummaryAPI";
 import toast from "react-hot-toast";
 import AxiosToastError from "../../utilitis/AxiosToastError";
 import Axios from "../../utilitis/Axios";
+import { useDispatch} from "react-redux";
+import fetchUserDetails from "../../utilitis/fetchUserDetails";
+import { setUserDetails } from "../../store/userSlice";
 
 const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-
-
   const [passwordVisible, setPasswordVisible] = useState(false);
-
 
   // Check if both email and password fields are filled
   const validValue = formData.email.trim() !== "" && formData.password.trim() !== "";
@@ -35,14 +35,22 @@ const Login = () => {
   
     try {
       const response = await Axios({
-        ...SummaryAPI.login,
+        method: "POST",
+        url: `${baseURL}${SummaryAPI.login.url}`,
         data: formData,
       });
   
+      console.log("Response:", response);
+  
       if (response.data.error) {
-        toast.error(response.data.message); // This will show the error message from the backend
+        toast.error(response.data.message); // Show error from backend
       } else {
         toast.success(response.data.message);
+        localStorage.setItem('accessToken', response.data.data.accessToken);
+        localStorage.setItem('refreshToken', response.data.data.refreshToken);
+
+        const userDetails = await fetchUserDetails();
+        dispatch(setUserDetails(userDetails.data));
         setFormData({
           email: "",
           password: "",
@@ -50,9 +58,18 @@ const Login = () => {
         navigate("/select-merchant");
       }
     } catch (error) {
-      AxiosToastError(error); // Catch other errors and display with toast
+      console.error("Error during login:", error); // Log the error to understand the issue
+      AxiosToastError(error); // Handle the error from Axios with toast
+      if (error.response) {
+        // This will log the error response from the backend if it exists
+        console.log("Error Response:", error.response.data);
+        toast.error(error.response.data.message || "An error occurred during login");
+      }
     }
   };
+  
+  
+  
   
   return (
     <Wrapper>
@@ -82,7 +99,7 @@ const Login = () => {
               </EyeToggle>
             </PasswordWrapper>
 
-            <Link to="/verify-email">
+            <Link to="/verify-email-forgot password">
               <p>Forgot password</p>
             </Link>
 
