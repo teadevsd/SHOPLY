@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { forgotPasswordController, loginController, logOutController, refreshToken, registerUserController, resetPassword, updateUserDetails, uploadAvatarController, verifyEmailController, verifyForgotPasswordOTP } from "../controller/usercontroller.js";
+import { forgotPasswordController, getUserDetails, loginController, logOutController, refreshToken, registerUserController, resetPassword, updateUserDetails, uploadAvatarController,  verifyEmailController,  verifyForgotPasswordOTP } from "../controller/usercontroller.js";
 import auth from "../middleware/auth.js";
 import upload from "../middleware/multer.js";
+import { resendOTP } from "../utilis/generateOTP.js";
 
 
 
@@ -15,8 +16,11 @@ userRouter.put('/upload-avatar', auth, upload.single('avatar'), uploadAvatarCont
 userRouter.put('/update-user', auth, updateUserDetails);
 userRouter.put('/forgot-password', forgotPasswordController);
 userRouter.put('/verify-forgot-password-OTP', verifyForgotPasswordOTP);
+userRouter.post('/resend-otp', resendOTP)
 userRouter.patch('/reset-password', resetPassword);
 userRouter.post('/refresh-token', refreshToken);
+userRouter.get('/user-details', auth, getUserDetails);
+
 
 
 

@@ -1,49 +1,48 @@
 import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
-    userId : {
+    userId: {
         type: mongoose.Schema.ObjectId,
-        ref: "User"
+        ref: "User",
     },
-    orderId : {
+    orderId: {
         type: String,
-        default: [true, "Provide orderId"],
-        unique: true
+        required: [true, "Provide orderId"],
+        unique: true,
     },
-    product_Id : {
+    product_Id: {
         type: mongoose.Schema.ObjectId,
-        ref: "product"
+        ref: "product",
     },
-    product_details : {
+    product_details: {
+        type: Object, // Assuming this is an object with details
+    },
+    payment_Id: {
         type: String,
-        image: Array,
+        default: "",
     },
-    payment_Id : {
+    payment_status: {
         type: String,
-        default: ""
+        default: "",
     },
-    payment_status : {
-        type: String,
-        default: ""
-    },
-    delivery_address : {
+    delivery_address: {
         type: mongoose.Schema.ObjectId,
-        ref: "address"
+        ref: "address",
     },
-    subTotalAmt : {
+    subTotalAmt: {
         type: Number,
-        default: 0
+        default: 0,
     },
-    totalAmt : {
+    totalAmt: {
         type: Number,
-        default: 0
+        default: 0,
     },
-    invoice_receipt : {
+    invoice_receipt: {
         type: String,
-        default: ""
-    }
-},{
-    timestamps: true
+        default: "",
+    },
+}, {
+    timestamps: true,
 });
 
 const orderModel = new mongoose.model("order", orderSchema);

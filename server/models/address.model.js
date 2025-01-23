@@ -12,7 +12,7 @@ const addressSchema = new mongoose.Schema({
     state : {
         type: String,
         default: ""
-    },
+    }, 
     pincode: {
         type: String,
         default: ""

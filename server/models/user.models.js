@@ -49,6 +49,26 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    verify_email_code: { 
+        type: String 
+    },
+    otp: { 
+        type: String 
+    },
+    otpExpiresAt: { 
+        type: Date 
+    },
+    resetOtp: { 
+        type: String 
+    },
+    otpExpiry: { 
+         type: Date, 
+        select: false 
+    },
+    otpVerified: { 
+        type: Boolean, 
+        default: false 
+    },
     last_login_date: {
         type: Date,
         default: ""
@@ -76,7 +96,7 @@ const userSchema = new mongoose.Schema({
     },
     forgot_password_expiry: {
         type: Date,
-        default: ""
+        default: null
     },
     role : {
         type: String,
