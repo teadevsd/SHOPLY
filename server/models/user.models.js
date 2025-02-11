@@ -104,9 +104,9 @@ const userSchema = new mongoose.Schema({
         default: "User"
     }
 
-},{
+},{ 
     timestamps: true
 });
 
-const UserModel = new mongoose.model("User", userSchema );
+const UserModel = new mongoose.model("Usershoply", userSchema );
 export default UserModel
