@@ -4,6 +4,9 @@ import Hero from "../components/Hero/Hero";
 import HeroTwo from "../components/Hero/HeroTwo";
 import HeroThree from "../components/Hero/HeroThree";
 import HeroFour from "../components/Hero/HeroFour";
+import Popular from "../components/Home/Popular";
+import HomeAds from "../components/Home/HomeAds";
+import ExploreProducts from "../components/Home/ExploreProducts";
 
 const Homepage = () => {
   const [currentHero, setCurrentHero] = useState(0);
@@ -31,7 +34,8 @@ const Homepage = () => {
   };
 
   return (
-    <Slider>
+   <>
+     <Slider>
       {/* Navigation arrows */}
       <Arrow onClick={prevHeroSlide}>&lt;</Arrow>
 
@@ -48,6 +52,12 @@ const Homepage = () => {
 
       <Arrow onClick={nextHero}>&gt;</Arrow>
     </Slider>
+
+    <Popular/>
+    <HomeAds/>
+    <ExploreProducts/>
+   
+   </>
 
     
   );

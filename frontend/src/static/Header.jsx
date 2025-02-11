@@ -23,7 +23,6 @@ const Header = () => {
   const location = useLocation();
   const [isSearchPage, setIsSearchPage] = useState(false);
 
-
   useEffect(() => {
     const isSearch = location.pathname === '/search'
     setIsSearchPage(isSearch)
@@ -114,7 +113,7 @@ const Header = () => {
               <Link to= "/" ><p>Home </p> </Link>
               <Link><p>Order <TiArrowSortedDown/> </p> </Link>
               <Link><p>Cart <TiArrowSortedDown/> </p> </Link>
-              <Link><p>Profile <TiArrowSortedDown/> </p> </Link>
+              <Link to= "/dashboard" ><p>Account <TiArrowSortedDown/> </p> </Link>
               <Link><p>About Us </p> </Link>
               <Link><p>Contact Us</p> </Link>
           </Navlist>

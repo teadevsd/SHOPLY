@@ -20,6 +20,19 @@ import fetchUserDetails from "./utilitis/fetchUserDetails.js";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setUserDetails } from "./store/userSlice.js";
+import Popular from "./components/Home/Popular.jsx";
+import HomeAds from "./components/Home/HomeAds.jsx";
+import ExploreProducts from "./components/Home/ExploreProducts.jsx";
+
+import Category from "./pages/Category.jsx";
+import SubCategory from "./pages/SubCategory.jsx";
+import UploadProducts from "./components/Categories/UploadProducts.jsx";
+import ProductAdmin from "./pages/ProductAdmin.jsx";
+import MyOrder from "./pages/MyOrder.jsx";
+import Account from "./pages/Settings.jsx";
+import DashboardLayout from "./pages/Dashboard.jsx";
+import Settings from "./pages/Settings.jsx";
+
 
 function App() {
 
@@ -53,6 +66,23 @@ function App() {
         <Route path="/merchant-lists" element={<MerchantList />} />
         <Route path="/verification-otp" element={<OtpVerifcation />} />
         <Route path="/verification-successful" element={<VerificationSuccessful />} />
+        <Route path="/popular-product" element={<Popular />} />
+        <Route path="/product-ads" element={<HomeAds />} />
+        <Route path="/explore-products" element={<ExploreProducts />} />
+
+        
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route path="settings" element={<Settings />} />
+          <Route path="category" element={<Category />} />
+          <Route path="sub-category" element={<SubCategory />} />
+          <Route path="upload-products" element={<UploadProducts />} />
+          <Route path="products" element={<ProductAdmin />} />
+          <Route path="orders" element={<MyOrder />} />
+        </Route>
+
+
+
+
 
 
 

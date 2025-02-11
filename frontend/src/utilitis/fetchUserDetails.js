@@ -1,7 +1,7 @@
 import toast from "react-hot-toast"
-import SummaryAPI from "../common/SummaryAPI"
-import Axios from "./Axios"
-import AxiosToastError from "./AxiosToastError"
+import Axios from "./Axios.js"
+import AxiosToastError from "./AxiosToastError.js"
+import SummaryAPI from "../common/SummaryAPI.js"
 
 const fetchUserDetails = async () => {
     try {
@@ -9,7 +9,7 @@ const fetchUserDetails = async () => {
             ...SummaryAPI.userDetails,
         })
         return response.data
-        console.log("userDetails", response.data)
+        
        
     } catch (error) {
         AxiosToastError(error)
