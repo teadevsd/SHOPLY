@@ -6,13 +6,15 @@ import morgan from "morgan"
 import helmet from "helmet"
 import connectToDB from "./config/connectDB.js";
 import userRouter from "./routes/user.route.js";
+import categoryRouter from "./routes/categoryRoute.js";
+import uploadRoute from "./routes/uploadRoute.js";
 dotenv.config();
 
 const app = express();
 app.use(cors({
     origin: process.env.FRONTEND_URL,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],	
-    allowedHeaders: ['Content-Type'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
 
@@ -31,8 +33,12 @@ app.get("/", (request, response)=>{
         message: "Server is running " + Port 
     })
 })
-
+ 
 app.use('/api/v1/user', userRouter)
+app.use('/api/v1/admin', categoryRouter)
+app.use('/api/v1/file', uploadRoute) 
+
+
 
 app.listen(Port, ()=>{
     console.log("App is running and active on port:", Port)
