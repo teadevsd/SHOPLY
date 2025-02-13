@@ -12,7 +12,7 @@ const Hero = () => {
                 Browse products from trusted merchants near you—shop made simple!
                 </h2>
 
-                <Link><button>Explore</button></Link>
+                <Link to ='/login'><button>Explore</button></Link>
             </Herocont>
         </Innerwrap>
     </Wrapper>

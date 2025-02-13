@@ -1,5 +1,6 @@
 import styled from "styled-components"
 import womenimage from "../../assets/images/png/attractive.png"
+import { Link } from "react-router-dom"
 
 const HeroThree = () => {
   return (
@@ -10,7 +11,7 @@ const HeroThree = () => {
                 <Contents>
                     <p>Women’s Collections</p>
                     <span>Featured woman collections that give you another vibe.</span>
-                    <strong>Shop Now</strong>
+                    <Link to='/login'><button>Shop Now!</button></Link>
                 </Contents>
 
                 <img src= {womenimage} alt="" />

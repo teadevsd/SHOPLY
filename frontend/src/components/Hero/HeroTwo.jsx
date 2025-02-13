@@ -20,7 +20,7 @@ const HeroTwo = () => {
                     Organic Food</h3>
                     <span>Free shipping on all your order. we deliver, you enjoy</span>
 
-                    <Link><button>Shop Now!</button></Link>
+                    <Link to='/login'><button>Shop Now!</button></Link>
                 </Detailcont>
 
             </Herotwocontent>

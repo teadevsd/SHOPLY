@@ -34,6 +34,7 @@ import DashboardLayout from "./pages/Dashboard.jsx";
 import Settings from "./pages/Settings.jsx";
 
 
+
 function App() {
 
   const dispatch = useDispatch(); 
@@ -78,6 +79,8 @@ function App() {
           <Route path="upload-products" element={<UploadProducts />} />
           <Route path="products" element={<ProductAdmin />} />
           <Route path="orders" element={<MyOrder />} />
+          
+
         </Route>
 
 

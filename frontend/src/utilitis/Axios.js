@@ -19,7 +19,7 @@ const Axios = axios.create({
       }
       return config
     },
-    (error) => {
+    (error) => { 
       return Promise.reject(error)
     }
   );

@@ -36,6 +36,22 @@ const SummaryAPI = {
     userDetails: {
         url : 'api/v1/user/user-details',	
         method : 'get'
+    },
+    addCategory: {
+        url : 'api/v1/admin/add-category',
+        method : 'post'
+    },
+    getAllCategory: {
+        url: 'api/v1/admin/get-all-category',
+        method: 'get'
+    },
+    uploadImage: {
+        url : 'api/v1/file/upload',
+        method : 'post'
+    },
+    updateCategory: {
+        url: 'api/v1/admin/update-category',
+        method: 'put'
     }
 
 }

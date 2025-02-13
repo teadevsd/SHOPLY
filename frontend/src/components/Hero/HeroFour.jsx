@@ -14,7 +14,7 @@ const HeroFour = () => {
                 </article>
                 <span>Trusted Baby-food product</span>
 
-                <Link><button>Shop Now!</button></Link>
+                <Link to ='/login'><button>Shop Now!</button></Link>
             </Wrapcontent>
             
             <img src= {hero4image} alt="hero4image" />
