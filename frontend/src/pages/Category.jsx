@@ -6,19 +6,28 @@ import Axios from '../utilitis/Axios';
 import SummaryAPI from '../common/SummaryAPI';
 import NoData from '../components/Categories/NoData';
 import EditCategory from '../components/Categories/EditCategory';
+import ConfirmBox from '../components/Categories/ConfirmBox';
+import toast from 'react-hot-toast';
+import AxiosToastError from '../utilitis/AxiosToastError';
+import { useSelector } from 'react-redux'; // Import useSelector to get user data
 
 const Category = () => {
   const [openUploadProducts, setOpenUploadProducts] = useState(false);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState([]);
   const [openEdit, setOpenEdit] = useState(false);
+  const [openDeleteConfirmBox, setOpenDeleteConfirmBox] = useState(false);
+  const [deleteCategory, setDeleteCategory] = useState({ id: "" });
+  const [selectedCategory, setSelectedCategory] = useState();
+  const [editData, setEditData] = useState({ name: "", image: "" });
+
+  const user = useSelector((state) => state?.user); // Get user data from Redux store
+  const isAdmin = user?.role === "Admin"; 
 
   const fetchCategory = async () => {
     try {
-      setLoading(true);
       const response = await Axios(SummaryAPI.getAllCategory);
       const { data: responseData } = response;
-
       if (responseData.success) {
         setCategories(responseData.data);
       }
@@ -36,19 +45,41 @@ const Category = () => {
     fetchCategory();
   }, []);
 
+  const handleDeleteCategory = async () => {
+    try {
+      const response = await Axios({
+        ...SummaryAPI.deleteCategory,
+        data: deleteCategory,
+      });
+
+      const { data: responseData } = response;
+      if (responseData.success) {
+        toast.success(responseData.message);
+        setOpenDeleteConfirmBox(false);
+        fetchCategory();
+      }
+    } catch (error) {
+      AxiosToastError(error);
+    }
+  };
+
   return (
     <Container>
       <section>
         <div className="category">
           <p>Category</p>
-          <button onClick={() => setOpenUploadProducts(true)}>Add Category</button>
+          
+          {/* Show "Add Category" button only for admin */}
+          {isAdmin && (
+            <button onClick={() => setOpenUploadProducts(true)}>Add Category</button>
+          )}
         </div>
 
-        {openUploadProducts && (
+        {openUploadProducts && isAdmin && (
           <UploadProducts
             close={() => setOpenUploadProducts(false)}
-            setCategories={setCategories} // ✅ Pass setCategories
-            categories={categories} // ✅ Pass categories for updating
+            setCategories={setCategories}
+            categories={categories}
           />
         )}
 
@@ -60,17 +91,28 @@ const Category = () => {
           <div className="category-list">
             {categories.length > 0 ? (
               categories.map((category) => (
-                <div key={category.id} className="category-item">
+                <div key={category.id || category.name} className="category-item">
                   <img src={category.image} alt={category.name} />
-                  {/* <p>{category.name}</p> */}
 
-                  <div className='btns'>
-                    <button onClick={() => {
-                      setOpenEdit(true)
-                    }}>Edit</button>
+                  {/* Show Edit and Delete buttons only for admin */}
+                  {isAdmin && (
+                    <div className='btns'>
+                      <button onClick={() => {
+                        setSelectedCategory(category);
+                        setOpenEdit(true);
+                        setEditData(category);
+                      }}>
+                        Edit
+                      </button>
 
-                    <button>Delete</button>
-                  </div>
+                      <button onClick={() => {
+                        setOpenDeleteConfirmBox(true);
+                        setDeleteCategory(category);
+                      }}>
+                        Delete
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))
             ) : (
@@ -79,21 +121,30 @@ const Category = () => {
           </div>
         )}
 
-        {
-          openEdit && (
-            <EditCategory 
-            close={() => {setOpenEdit(false)}}
-            />
-          )
-        }
+        {openEdit && selectedCategory && isAdmin && (
+          <EditCategory
+            data={editData}
+            close={() => setOpenEdit(false)}
+            setCategories={setCategories}
+            categories={categories}
+            fetchCategory={fetchCategory}
+          />
+        )}
 
+        {openDeleteConfirmBox && isAdmin && (
+          <ConfirmBox
+            close={() => setOpenDeleteConfirmBox(false)}
+            cancel={() => setOpenDeleteConfirmBox(false)}
+            confirm={handleDeleteCategory}
+          />
+        )}
       </section>
     </Container>
   );
 };
 
-
 export default Category;
+
 
 const Container = styled.div`
   .category {
@@ -103,22 +154,21 @@ const Container = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
+    border-radius: 10px;
 
     button {
-      width: 120px;
-      height: 30px;
-      background-color: transparent;
-      color: black;
-      border: 1px solid orange;
-      border-radius: 4px;
+      width: 140px;
+      height: 36px;
+      background-color: orange;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
       cursor: pointer;
-      display: block;
+      transition: 0.3s ease;
 
       &:hover {
-        background-color: orange;
-        color: white;
-        border: none;
-        transition: background-color 0.3s ease;
+        background-color: darkorange;
       }
     }
   }
@@ -127,66 +177,77 @@ const Container = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 200px; /* Ensures it takes up enough space */
+    height: 200px;
   }
 
   .category-list {
     margin-top: 20px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Responsive */
-    gap: 15px;
-}
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 20px;
+  }
 
-
-.category-item {
-  width: 150px;
-  background-color: #fff;
-  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-  border-radius: 5px;
-  text-align: center;
-  cursor: pointer;
-  padding: 10px; /* Add padding to give space */
-
-  /* &:hover {
-    transform: scale(1.1, 1.05);
-    transition: 0.3s ease-in-out;
-  } */
-
-  .btns {
+  .category-item {
+    background: #fff;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 8px;
+    border-radius: 12px;
+    text-align: center;
+    padding: 15px;
+    transition: 0.3s ease;
     display: flex;
-    justify-content: space-around;
-    /* margin-top: 10px; */
-  }
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
 
-  
-  .btns button {
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    font-family: 'Poppins';
-    cursor: pointer;
-    font-size: 14px;
-  }
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: rgba(0, 0, 0, 0.15) 0px 6px 12px;
+    }
 
-  /* First button (Edit) */
-  .btns button:nth-child(1) {
-    background-color: transparent;
-    border: 1px solid green;
-    color: black;
-    
-  }
+    img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
 
-  /* Second button (Delete) */
-  .btns button:nth-child(2) {
-    background-color: orangered;
-    color: white;
-  }
+    .btns {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+    }
 
-  img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-    border-radius: 5px;
+    .btns button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .btns button:nth-child(1) {
+      background-color: transparent;
+      border: 1px solid green;
+      color: green;
+      font-weight: bold;
+    }
+
+    .btns button:nth-child(1):hover {
+      background-color: green;
+      color: white;
+    }
+
+    .btns button:nth-child(2) {
+      background-color: orangered;
+      color: white;
+      font-weight: bold;
+    }
+
+    .btns button:nth-child(2):hover {
+      background-color: darkorange;
+    }
   }
-}
-`
+`;

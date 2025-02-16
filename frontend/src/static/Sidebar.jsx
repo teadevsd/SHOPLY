@@ -66,7 +66,7 @@ const Sidebar = ({ setDisplay }) => {
         <Styledlink to="/about" onClick={handleClick}>
           <nav>Cart</nav>
         </Styledlink>
-        <Styledlink to="/contact" onClick={handleClick}>
+        <Styledlink to="/dashboard" onClick={handleClick}>
           <nav>Account</nav>
         </Styledlink>
         <Styledlink to="/contact" onClick={handleClick}>
@@ -76,7 +76,7 @@ const Sidebar = ({ setDisplay }) => {
           <nav>Contact Us</nav>
         </Styledlink>
       </Naviga>
-{/* 
+
       <Loginbutton>
         <Button>
           <button>
@@ -92,7 +92,7 @@ const Sidebar = ({ setDisplay }) => {
             </Link>
           </button>
         </Sighin>
-      </Loginbutton> */}
+      </Loginbutton>
       
     </Container>
   );

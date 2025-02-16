@@ -73,10 +73,12 @@ const UploadProducts = ({ close, setCategories, categories }) => {
     <Container>
       <div className="content">
         <div className="subCateg">
-          <h4>Category</h4>
-          <button>
-            <IoCloseSharp size={24} onClick={close} />
+
+            <h4>Category</h4>
+              <button type="button" onClick={() => close()}>
+            <IoCloseSharp size={24} />
           </button>
+     
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -136,10 +138,14 @@ const Container = styled.div`
 
   .content {
     background-color: white;
-    width: 60%;
+    width: 40%;
     padding: 20px;
     border-radius: 4px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+      @media (max-width: 768px) {
+        width: 80%;
+      }
 
     .subCateg {
       display: flex;

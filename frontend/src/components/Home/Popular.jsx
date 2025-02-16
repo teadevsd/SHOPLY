@@ -46,7 +46,7 @@ const Popular = () => {
       <Innerwrapper>
         <Headerlink>
           <h3>Popular Categories</h3>
-          <Link>
+          <Link to='/dashboard/category'>
             <button>View All <FaArrowRightToBracket /></button>
           </Link>
         </Headerlink>

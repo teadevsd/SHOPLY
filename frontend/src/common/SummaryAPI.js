@@ -9,6 +9,10 @@ const SummaryAPI = {
         url : '/api/v1/user/login',
         method : 'post'
     },
+    logout : {
+        url: '/api/v1/user/logout',
+        method: 'post'
+    },
     verifyEmail: {
         url : '/api/v1/user/verified-successfully',
         method : 'post'
@@ -52,8 +56,11 @@ const SummaryAPI = {
     updateCategory: {
         url: 'api/v1/admin/update-category',
         method: 'put'
+    },
+    deleteCategory: {
+        url: 'api/v1/admin/delete-category',
+        method: 'delete'
     }
-
 }
 
 export default SummaryAPI

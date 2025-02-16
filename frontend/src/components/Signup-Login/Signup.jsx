@@ -322,11 +322,16 @@ const Signup = () => {
                 <label htmlFor="acceptTerms">I accept the Terms & Conditions</label>
               </CheckboxContainer>
 
+
+                <span>
+                   Already have an account? <Link to="/login">Login</Link>
+                </span>
               <StyledButton
                 type="submit"
                 disabled={!validValue}
                 style={{ cursor: validValue ? "pointer" : "not-allowed" }}
               >
+        
                 Sign Up
               </StyledButton>
             </form>

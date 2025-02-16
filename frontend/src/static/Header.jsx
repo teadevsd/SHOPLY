@@ -14,6 +14,7 @@ const Header = () => {
   const [toggle, setToggle] = useState(false);
   const user = useSelector((state) => state?.user)
   console.log('user from store', user)
+  const isAuthenticated = user?._id
 
   const handleToggle = () => {
     setToggle(!toggle);
@@ -111,17 +112,27 @@ const Header = () => {
         <InnerNav>
           <Navlist>
               <Link to= "/" ><p>Home </p> </Link>
-              <Link><p>Order <TiArrowSortedDown/> </p> </Link>
-              <Link><p>Cart <TiArrowSortedDown/> </p> </Link>
-              <Link to= "/dashboard" ><p>Account <TiArrowSortedDown/> </p> </Link>
+              {
+                isAuthenticated && (
+                  <>
+                    <Link><p>Order <TiArrowSortedDown/> </p> </Link>
+                    <Link><p>Cart <TiArrowSortedDown/> </p> </Link>
+                    <Link to= "/dashboard" ><p>Account <TiArrowSortedDown/> </p> </Link>
+                  </>
+                )}
               <Link><p>About Us </p> </Link>
               <Link><p>Contact Us</p> </Link>
           </Navlist>
 
-          <LoginDet>
-              <Link to= "/login"><button>Login</button></Link>
-              <Link to= "/signup"><button className="signBtn">Sign up</button></Link>
-          </LoginDet>   
+          {
+            !isAuthenticated && (
+              <LoginDet>
+                  <Link to= "/login"><button>Login</button></Link>
+                  <Link to= "/signup"><button className="signBtn">Sign up</button></Link>
+              </LoginDet>   
+            )
+          }
+
         </InnerNav>
       </Navbar>
 
@@ -296,7 +307,7 @@ const InnerNav = styled.div`
   height: 40px;
   
   @media (max-width: 768px) {
-    justify-content: center;
+    display: none;
   }
 `;
 
