@@ -1,4 +1,6 @@
 import categoryModel from "../models/category.model.js";
+import productModel from "../models/product.model.js";
+import subCategoryModel from "../models/subCategry.model.js";
 
 export const addCategoryController = async(req, res) =>{
     try {
@@ -45,7 +47,7 @@ export const addCategoryController = async(req, res) =>{
 export const getCategoryController = async(req, res) =>{
     try {
         
-        const data = await categoryModel.find();
+        const data = await categoryModel.find().sort({ createdAt: -1 });
 
         return res.json({
             data: data,
@@ -62,30 +64,83 @@ export const getCategoryController = async(req, res) =>{
     }
 };
 
-export const updateCategoryController = async(req, res) => {
+export const updateCategoryController = async (req, res) =>{
     try {
-        
-        const { categoryId, name, image } = req.body
+        const { _id, name, image } = req.body;
 
-        const update = await categoryModel.updateOne({
-            _id: categoryId
-        }, {
-            name,
-            image
-        })
+        if (!_id || !name || !image) {
+            return res.status(400).json({
+                message: "Missing required fields",
+                error: true,
+                success: false,
+            });
+        }
 
-        return res.json({
-            message: 'Category updated successfully',
+        // Find and update the category
+        const updatedCategory = await categoryModel.findByIdAndUpdate(
+            _id,
+            { name, image },
+            { new: true } // Returns the updated document
+        );
+
+        if (!updatedCategory) {
+            return res.status(404).json({
+                message: "Category not found",
+                error: true,
+                success: false,
+            });
+        }
+
+        return res.status(200).json({
+            message: "Category updated successfully",
             error: false,
             success: true,
-            data: update
-        })
+            data: updatedCategory,
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message || "Server error",
+            error: true,
+            success: false,
+        });
+    }
+};
+
+export const deleteCategoryController = async (req, res) => {
+    try {
+        const { _id } = req.body;
+
+        const checkSubcategory = await subCategoryModel.countDocuments({
+            category: { "$in": [_id] }
+        });
+
+        const checkProduct = await productModel.countDocuments({
+            category: { "$in": [_id] }
+        });
+
+        if (checkSubcategory > 0 || checkProduct > 0) {
+            return res.status(400).json({
+                message: "Category has subcategory or product",
+                error: true,
+                success: false
+            });
+        }
+
+        const deleteCategory = await categoryModel.deleteOne({ _id });
         
+        return res.status(200).json({
+            message: "Category deleted successfully",
+            error: false,
+            success: true,
+            data: deleteCategory
+        });
+
     } catch (error) {
         return res.status(500).json({
             message: error.message || error,
             error: true,
             success: false
-        })
+        });
     }
-}
+};

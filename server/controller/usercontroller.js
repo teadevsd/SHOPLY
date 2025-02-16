@@ -202,38 +202,32 @@ export async function loginController(request, response) {
  
 
 //logout user controller
-export async function logOutController(request, response) {
-
-    const userid = request.userId
-
+export async function logOutController(req, res) {
     try {
-        const cookieOption = {
-            httpOnly: true,
-            secure: true,
-            sameSite: "None"
-        }
+        const userId = req.userId;  
 
-        response.clearCookie('accessToken', cookieOption);
-        response.clearCookie('refreshToken', cookieOption);
+        // Clear cookies
+        res.clearCookie("accessToken", { httpOnly: true, secure: true, sameSite: "None" });
+        res.clearCookie("refreshToken", { httpOnly: true, secure: true, sameSite: "None" });
 
-        const removeRefreshToken = await UserModel.findByIdAndUpdate(userid, {
-            refresh_token : ""
-        })
+        // Remove refresh token from database
+        await UserModel.findByIdAndUpdate(userId, { refresh_token: "" });
 
-        return response.json({
+        return res.status(200).json({
             message: "Logout successfully",
             error: false,
-            sucess: true            
-        })
+            success: true            
+        });
 
     } catch (error) {
-        return response.status(500).json({
+        return res.status(500).json({
             message: error.message || error,
             error: true,
             success: false
-        })
+        });
     }
 }
+
 
 //upload user avatar
 export async function uploadAvatarController(request, response) {

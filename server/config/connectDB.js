@@ -15,4 +15,4 @@ const connectToDB = async ()=>{
         console.log("MongoDB connection erro", error)
     }
 }
-export default connectToDB      
+export default connectToDB

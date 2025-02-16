@@ -1,6 +1,6 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
-const productSchema = new mongo.Schema({
+const productSchema = new mongoose.Schema({
     name: {
         type: String
     },
@@ -17,7 +17,7 @@ const productSchema = new mongo.Schema({
     sub_category: [
         {
             type:mongoose.Schema.ObjectId,
-            ref: sub_category
+            ref: "sub_category"
         }
     ],
     unit : {
